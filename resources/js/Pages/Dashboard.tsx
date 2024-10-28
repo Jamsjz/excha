@@ -1,6 +1,6 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import DashBoard from '@/Layouts/DashBoardLayout';
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, PencilIcon, TrashIcon } from "lucide-react"
 import { ArrowUpDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,20 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
+
+import { toast } from "@/hooks/use-toast";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 import {
@@ -36,6 +50,7 @@ import {
 } from "@/components/ui/table"
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 export type Book = {
     id: number;
@@ -44,7 +59,7 @@ export type Book = {
     price: number;
 }
 
-// const user = usePage().props.auth.user
+// const { toast } = useToast();
 
 export const thiscolumns: ColumnDef<Book>[] = [
     {
@@ -64,6 +79,13 @@ export const thiscolumns: ColumnDef<Book>[] = [
                 </Button>
             )
         },
+        cell: ({ row }) => {
+            return (
+                <>
+                    <Link href={`/book/${row.getValue("id")}`} className="cursor-pointer">{row.getValue("name")}</Link>
+                </>
+            )
+        }
 
     },
     {
@@ -97,22 +119,55 @@ export const thiscolumns: ColumnDef<Book>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
-            const payment = row.original
-
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
+                <>
+                    <div className="flex items-center">
+                        <Button variant="ghost" className="h-8 w-8 p-0 mr-1">
+                            <Link href={`/book/edit/${row.getValue("id")}`}><PencilIcon /></Link>
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit Product</DropdownMenuItem>
-                        <DropdownMenuItem className='hover:bg-red-700 bg-red-600 dark:hover:bg-red-700'>Remove Product</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        <AlertDialog>
+                            <AlertDialogTrigger ><Button variant="destructive" className="h-8 w-8 p-0 mr-1"><TrashIcon /></Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this book
+                                        and remove the data from our servers.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>
+                                        <Button variant="destructive" className="" onClick={(e) => {
+                                            const {
+                                                delete: destroy,
+                                            } = useForm({
+                                                password: '',
+                                            });
+                                            e.preventDefault()
+                                            destroy(
+                                                route('book.destroy'), {
+                                                preserveScroll: true,
+                                                onError: () => toast({
+                                                    title: "Error",
+                                                    description: "Could not delete book",
+                                                }),
+                                                onFinish: () => toast({
+                                                    title: "Book Deleted",
+                                                    description: "Your book has been deleted",
+                                                }),
+                                            })
+                                        }}>
+                                            <Link href={`/api/book/edit/${row.getValue("id")}`} method="delete" as="button">Confirm</Link>
+                                        </Button>
+
+
+                                    </AlertDialogCancel>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </>
             )
         }
     }
@@ -194,7 +249,7 @@ export function DataTable<TData, TValue>({
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
-                                className="cursor-pointer"
+                                className=""
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>

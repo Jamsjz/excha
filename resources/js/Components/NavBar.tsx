@@ -81,6 +81,9 @@ function ProfileDropdown() {
                             <div className="">
                                 {user.email}
                             </div>
+                            <div className="">
+                                {user.phone}
+                            </div>
                         </div>
                     </div>
                 </DropdownMenuItem>
@@ -159,40 +162,28 @@ export default function NavBar({
                             <ModeToggle />
                         </div>
 
-                        <a href="https://instagram.com/excha_business" target="_blank">
-                            <Avatar className="cursor-pointer mx-2">
-                                <AvatarImage src="img/excha.jpeg" />
-                                <AvatarFallback>EX</AvatarFallback>
-                            </Avatar>
-                        </a>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger>
+                                <Avatar className="cursor-pointer mx-2">
+                                    <AvatarImage src="img/excha.jpeg" />
+                                    <AvatarFallback>EX</AvatarFallback>
+                                </Avatar>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>
+
+                                    <a href="https://instagram.com/excha_business" target="_blank">
+                                        Instagram
+                                    </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Link href="/about">About Us</Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <div>
                             <ProfileDropdown />
                         </div>
-
-                        {/* <div className="md:hidden"> */}
-                        {/*     <Sheet> */}
-                        {/*         <SheetTrigger asChild> */}
-                        {/*             <Button variant="outline"> */}
-                        {/*                 <MenuIcon /> */}
-                        {/*             </Button> */}
-                        {/*         </SheetTrigger> */}
-                        {/*         <SheetContent> */}
-                        {/*             <SheetHeader> */}
-                        {/*                 <SheetTitle>Menu</SheetTitle> */}
-                        {/*             </SheetHeader> */}
-                        {/**/}
-                        {/*             <div className="my-2"> */}
-                        {/*                 <ModeToggle /> */}
-                        {/*             </div> */}
-                        {/**/}
-                        {/*             <SheetFooter> */}
-                        {/*                 <SheetClose asChild> */}
-                        {/*                     <Button>Close</Button> */}
-                        {/*                 </SheetClose> */}
-                        {/*             </SheetFooter> */}
-                        {/*         </SheetContent> */}
-                        {/*     </Sheet> */}
-                        {/* </div> */}
                     </div>
                 </div >
 
@@ -262,12 +253,7 @@ export default function NavBar({
                             <ModeToggle />
                         </div>
 
-                        <a href="https://instagram.com/excha_business" target="_blank">
-                            <Avatar className="cursor-pointer mx-2">
-                                <AvatarImage src="img/excha.jpeg" />
-                                <AvatarFallback>EX</AvatarFallback>
-                            </Avatar>
-                        </a>
+
 
                         <div className="md:hidden">
                             <Sheet>

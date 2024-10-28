@@ -16,14 +16,16 @@ return new class extends Migration
             $table->string('name');
             $table->string('author');
             $table->float('price', 10, 2);
-            $table->foreignIdFor(App\Models\User::class)->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->longText('description');
+            $table->foreignIdFor(App\Models\User::class)->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
 
         //marked
         Schema::create('user_book', function (Blueprint $table) {
-            $table->foreignIdFor(App\Models\User::class)->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignIdFor(App\Models\Book::class)->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignIdFor(App\Models\User::class)->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignIdFor(App\Models\Book::class)->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->timestamps();
             $table->primary(['user_id', 'book_id']);
         });
     }

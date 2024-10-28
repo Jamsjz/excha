@@ -18,6 +18,7 @@ export default function Sell() {
         bookname: "",
         author: "",
         price: 0,
+        description: ""
     })
 
     function handleChange(e: any) {
@@ -65,10 +66,9 @@ export default function Sell() {
                             <label htmlFor="price">Price</label>
                             <Input value={values.price} onChange={handleChange} type="number" name="price" required />
 
-                            {/* <label htmlFor="tags">Tags</label> */}
-                            {/* <Input onChange={handleChange} type="text" name="tags" required /> */}
-                            {/* <small>The tags are comma separated with a space, eg: "horror, comedy"</small> */}
-
+                            <label htmlFor="description">Description</label>
+                            <Input value={values.description} onChange={handleChange} type="textarea" name="description" required
+                                placeholder="Please enter other important information about the book like publication, illustrators, etc." />
                         </CardContent>
                         <CardFooter>
                             <Button type="submit" className="btn btn-primary" >

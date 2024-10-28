@@ -1,41 +1,32 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { PageProps } from '@/types';
-import { Head } from '@inertiajs/react';
-import UpdateBookInformationForm from './Partials/UpdateBookInformationForm';
-import DeleteBookForm from './Partials/DeleteBookForm';
+import { Head } from "@inertiajs/react";
+import UpdateBookInformationForm from "./Partials/UpdateBookInformationForm";
 
-export default function Edit({
-    mustVerifyEmail,
-    status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+export default function Edit(
+    {
+        mustVerifyEmail,
+        status,
+        book
+    }: {
+        mustVerifyEmail: boolean;
+        status?: string;
+        book: {
+            name: string,
+            author: string,
+            price: number
+            user_id: number
+        }
+    }
+) {
     return (
         <>
-            <AuthenticatedLayout
-                header={
-                    <h2 className="text-xl font-semibold leading-tight ">
-                        Profile
-                    </h2>
-                }
-            >
-                <Head title="Profile" />
-
-                <div className="py-12">
-                    <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                        <div className="max-w-xl">
-                            <UpdateBookInformationForm
-                                mustVerifyEmail={mustVerifyEmail}
-                                status={status}
-                            />
-                            <div>
-
-                                <div className="max-w-xl">
-                                    <DeleteBookForm />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </AuthenticatedLayout>
+            <Head title="Edit Book" />
+            <UpdateBookInformationForm
+                mustVerifyEmail={mustVerifyEmail}
+                book={book}
+                status={status}
+                className=""
+            />
         </>
-    );
+    )
+
 }

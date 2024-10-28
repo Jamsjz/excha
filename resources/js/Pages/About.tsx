@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Head } from "@inertiajs/react";
 
 export default function About() {
     return (
         <>
+            <Head title="About" />
             <div className="">
                 <h1 className="text-[4rem] align-middle text-center">About Us</h1>
             </div>
@@ -12,7 +14,9 @@ export default function About() {
                         Kaustuv Pant
                     </CardTitle>
                     <CardContent>
-                        <img src="img/kaustuv.png" alt="" />
+                        <a href="https://instagram.com/sinkaustan" target="_blank">
+                            <img src="img/kaustuv.png" alt="" />
+                        </a>
                     </CardContent>
                 </Card>
                 <Card className="sm:w-[50%] w-[90%] my-2">
@@ -20,7 +24,9 @@ export default function About() {
                         Bhashkar Paudyal
                     </CardTitle>
                     <CardContent>
-                        <img src="img/bhashkar.png" alt="" />
+                        <a href="https://jamsjz.github.io" target="_blank">
+                            <img src="img/bhashkar.png" alt="" />
+                        </a>
                     </CardContent>
                 </Card>
             </div>

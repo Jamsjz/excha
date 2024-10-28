@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 
 export default function Show(
     { book, seller }: {
@@ -8,11 +8,14 @@ export default function Show(
             author: string,
             price: number,
             user_id: number,
+            description: string
             id: number
         },
         seller: {
             name: string,
+            phone: string,
             email: string,
+
             id: number
         }
     }
@@ -36,6 +39,9 @@ export default function Show(
                             <div className="flex">
                                 <strong>Price: </strong><p className="ml-2">{book.price}</p>
                             </div>
+                            <div className="flex">
+                                <strong>Description: </strong><p className="ml-2">{book.description}</p>
+                            </div>
                         </div>
                         <hr />
                         <div>
@@ -48,10 +54,15 @@ export default function Show(
                                 <p className="ml-2">
                                     <a href={`
 mailto:${seller.email}?subject=Regarding%20Book%20Purchase&body=I%20want%20to%20purchase%20${book.name}%20of%20id%20${book.id}
-`} target="_blank">
+`}
+                                        target="_blank">
                                         {seller.email}
                                     </a>
                                 </p>
+                            </div>
+
+                            <div className="flex">
+                                <strong>Phone Number: </strong><p className="ml-2">{seller.phone}</p>
                             </div>
                         </div>
                     </div>

@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Book;
-use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
 class BookController extends Controller
@@ -60,6 +60,7 @@ class BookController extends Controller
             'name' => $request->bookname,
             'author' => $request->author,
             'price' => $request->price,
+            'description' => $request->description,
             'user_id' => $user_id,
         ]);
     }
@@ -67,24 +68,28 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Book $book)
     {
-        $book = Book::find($id);
-        $seller_id = $book->user_id;
-        $seller = User::find($seller_id);
-
         return Inertia::render('Book/Show', [
             'book' => $book,
-            'seller' => $seller,
+            'seller' => $book->seller,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Book $book)
     {
-        //
+        $user = Auth::user();
+
+        if ($book->seller->id === $user->id) {
+            return Inertia::render('Book/Edit', [
+                'book' => $book,
+                'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+                'status' => session('status'),
+            ]);
+        }
+
+        return 'This is not your book!';
+
     }
 
     /**
@@ -92,11 +97,24 @@ class BookController extends Controller
      */
     public function update(UpdateBookRequest $request, Book $book)
     {
-        //
+        if ($book->seller->id !== Auth::user()->id) {
+            return 'This is not your book!';
+        }
+        $book->update($request->validated());
+        $book->save();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Book $book) {}
+    public function destroy(Book $book)
+    {
+
+        if ($book->seller->id !== Auth::user()->id) {
+            return 'This is not your book!';
+        }
+        $book->delete();
+
+        return Redirect::route('dashboard');
+    }
 }

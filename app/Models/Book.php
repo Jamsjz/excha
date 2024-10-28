@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Book extends Model
 {
@@ -16,18 +17,13 @@ class Book extends Model
         'user_id',
     ];
 
-    public function seller()
+    public function seller(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function marked_by()
     {
-        return $this->belongsToMany(User::class, 'user_books');
-    }
-
-    public function latestmarkedby()
-    {
-        return $this->hasOne(User::class)->latestOfMany();
+        return $this->belongsToMany(User::class, 'user_book');
     }
 }

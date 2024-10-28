@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Head } from "@inertiajs/react"
+import { Head, Link } from "@inertiajs/react"
 import { PlusIcon, SearchIcon } from "lucide-react"
 
 import {
@@ -68,7 +68,13 @@ export const thiscolumns: ColumnDef<Book>[] = [
                 </Button>
             )
         },
-
+        cell: ({ row }) => {
+            return (
+                <>
+                    <Link href={`/book/${row.getValue("id")}`}>{row.getValue("name")}</Link>
+                </>
+            )
+        }
     },
     {
         accessorKey: "author",
