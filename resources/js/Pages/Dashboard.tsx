@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { DataTable } from './Profile/Buy';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, Column } from '@tanstack/react-table';
 
 export type Book = {
     id: number;
@@ -99,7 +99,7 @@ export function Dashboard({ markedBooks, userProducts }: DashboardProps) {
         },
         {
             accessorKey: "name",
-            header: ({ column }) => (
+            header: ({ column }: {column: Column<Book>}) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -124,7 +124,7 @@ export function Dashboard({ markedBooks, userProducts }: DashboardProps) {
         },
         {
             accessorKey: "author",
-            header: ({ column }) => (
+            header: ({ column }: {column: Column<Book>}) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -136,7 +136,7 @@ export function Dashboard({ markedBooks, userProducts }: DashboardProps) {
         },
         {
             accessorKey: "price",
-            header: ({ column }: { column: ColumnDef<Book> }) => (
+            header: ({ column }: { column: Column<Book> }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
