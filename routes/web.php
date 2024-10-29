@@ -22,6 +22,10 @@ Route::get('', function () {
     return redirect('/dashboard');
 })->name('root');
 
+
+
+
+
 Route::get('/about', function () {
     return Inertia::render('About', [
         'canLogin' => Route::has('login'),
