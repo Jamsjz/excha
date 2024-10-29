@@ -7,16 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
 
-Route::get('/', function () {
+Route::get('', function () {
     $user = Auth::user();
     if (! $user) {
         return Inertia::render('Home', [
@@ -28,7 +20,6 @@ Route::get('/', function () {
     }
 
     return redirect('/dashboard');
-
 })->name('root');
 
 Route::get('/about', function () {
@@ -60,10 +51,16 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('/api/book', [BookController::class, 'store'])->name('api.book.store');
-    Route::get('/api/book', [BookController::class, 'dashboard'])->name('api.book.search');
-    Route::patch('/api/book/edit/{book}', [BookController::class, 'update'])->name('book.update')->whereNumber('book');
-    Route::delete('/api/book/edit/{book}', [BookController::class, 'destroy'])->name('book.destroy')->whereNumber('book');
+    Route::group([
+        'prefix'=>'/api/book',
+        'as'=>'api.book'
+    ], function(){
+        Route::post('/', [BookController::class, 'store'])->name('.store');
+        Route::post('/mark/{book}', [BookController::class, 'mark'])->name('.mark');
+        Route::delete('/mark/{book}', [BookController::class, 'deleteMark'])->name('.mark.destroy');
+        Route::patch('/{book}', [BookController::class, 'update'])->name('.update')->whereNumber('book');
+        Route::delete('/{book}', [BookController::class, 'destroy'])->name('.destroy')->whereNumber('book');
+    });
     Route::get('/book/{book?}', [BookController::class, 'show'])->name('book.show')->whereNumber('book');
     Route::get('/book/edit/{book}', [BookController::class, 'edit'])->name('book.edit')->whereNumber('book');
 });

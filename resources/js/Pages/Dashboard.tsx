@@ -1,20 +1,11 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import DashBoard from '@/Layouts/DashBoardLayout';
-import { MoreHorizontal, PencilIcon, TrashIcon } from "lucide-react"
-import { ArrowUpDown } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
-
-import { toast } from "@/hooks/use-toast";
+import { PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -25,51 +16,90 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-
-
-import {
-    ColumnDef,
-    ColumnFiltersState,
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    SortingState,
-    useReactTable,
-} from "@tanstack/react-table"
-
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
+import { DataTable } from './Profile/Buy';
+import { ColumnDef } from '@tanstack/react-table';
 
 export type Book = {
     id: number;
     name: string;
     author: string;
     price: number;
+    user_id: number;
 }
 
-// const { toast } = useToast();
+type DashboardProps = {
+    markedBooks: Book[];
+    userProducts: Book[];
+}
 
-export const thiscolumns: ColumnDef<Book>[] = [
-    {
-        accessorKey: "id",
-        header: "ID",
-    },
-    {
-        accessorKey: "name",
-        header: ({ column }) => {
-            return (
+export function Dashboard({ markedBooks, userProducts }: DashboardProps) {
+    const { auth } = usePage().props;
+    const user = auth.user;
+
+    const [minPrice, setMinPrice] = useState<string>('');
+    const [maxPrice, setMaxPrice] = useState<string>('');
+    const [filteredMarkedBooks, setFilteredMarkedBooks] = useState(markedBooks);
+    const [filteredUserProducts, setFilteredUserProducts] = useState(userProducts);
+
+    const isBookMarked = (bookId: number) => {
+        return markedBooks.some(markedBook => markedBook.id === bookId);
+    };
+
+    useEffect(() => {
+        const filterBooks = (books: Book[]) => {
+            return books.filter(book => {
+                const price = book.price;
+                const meetsMinPrice = !minPrice || price >= parseFloat(minPrice);
+                const meetsMaxPrice = !maxPrice || price <= parseFloat(maxPrice);
+                return meetsMinPrice && meetsMaxPrice;
+            });
+        };
+
+        setFilteredMarkedBooks(filterBooks(markedBooks));
+        setFilteredUserProducts(filterBooks(userProducts));
+    }, [minPrice, maxPrice, markedBooks, userProducts]);
+
+    const PriceRangeFilter = () => (
+        <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-2">
+                <Input
+                    type="number"
+                    placeholder="Min Price"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="w-32"
+                />
+                <span>to</span>
+                <Input
+                    type="number"
+                    placeholder="Max Price"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="w-32"
+                />
+            </div>
+            <Button
+                variant="outline"
+                onClick={() => {
+                    setMinPrice('');
+                    setMaxPrice('');
+                }}
+            >
+                Reset
+            </Button>
+        </div>
+    );
+
+    const columns: ColumnDef<Book>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+        },
+        {
+            accessorKey: "name",
+            header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -77,21 +107,24 @@ export const thiscolumns: ColumnDef<Book>[] = [
                     Book Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
+            ),
+            cell: ({ row }) => (
+                <Button onClick={() => {
+                    router.get(route('book.show', {
+                        'book': row.getValue('id')
+                    }), {
+                        preserveScroll: true,
+                        preserveState: true
+                    });
+                }
+                } className="" variant='ghost' >
+                    {row.original.name}
+                </Button >
             )
         },
-        cell: ({ row }) => {
-            return (
-                <>
-                    <Link href={`/book/${row.getValue("id")}`} className="cursor-pointer">{row.getValue("name")}</Link>
-                </>
-            )
-        }
-
-    },
-    {
-        accessorKey: "author",
-        header: ({ column }) => {
-            return (
+        {
+            accessorKey: "author",
+            header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -99,13 +132,11 @@ export const thiscolumns: ColumnDef<Book>[] = [
                     Author
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
-            )
+            ),
         },
-    },
-    {
-        accessorKey: "price",
-        header: ({ column }) => {
-            return (
+        {
+            accessorKey: "price",
+            header: ({ column }: { column: ColumnDef<Book> }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -113,200 +144,118 @@ export const thiscolumns: ColumnDef<Book>[] = [
                     Price
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
-            )
+            ),
         },
-    },
-    {
-        id: "actions",
-        cell: ({ row }) => {
-            return (
-                <>
-                    <div className="flex items-center">
-                        <Button variant="ghost" className="h-8 w-8 p-0 mr-1">
-                            <Link href={`/book/edit/${row.getValue("id")}`}><PencilIcon /></Link>
-                        </Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger ><Button variant="destructive" className="h-8 w-8 p-0 mr-1"><TrashIcon /></Button></AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete this book
-                                        and remove the data from our servers.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogCancel>
-                                        <Button variant="destructive" className="" onClick={(e) => {
-                                            const {
-                                                delete: destroy,
-                                            } = useForm({
-                                                password: '',
-                                            });
-                                            e.preventDefault()
-                                            destroy(
-                                                route('book.destroy'), {
-                                                preserveScroll: true,
-                                                onError: () => toast({
-                                                    title: "Error",
-                                                    description: "Could not delete book",
-                                                }),
-                                                onFinish: () => toast({
-                                                    title: "Book Deleted",
-                                                    description: "Your book has been deleted",
-                                                }),
-                                            })
-                                        }}>
-                                            <Link href={`/api/book/edit/${row.getValue("id")}`} method="delete" as="button">Confirm</Link>
-                                        </Button>
+        {
+            id: "actions",
+            cell: ({ row }) => {
+                const book = row.original;
 
+                const handleDelete = () => {
+                    router.delete(
+                        route('api.book.destroy', { book: book.id }),
+                        {
+                            preserveScroll: true,
+                            onSuccess: () => {
+                                toast({
+                                    title: "Success",
+                                    description: "Book deleted successfully",
+                                });
+                            },
+                            onError: () => {
+                                toast({
+                                    title: "Error",
+                                    description: "Failed to delete book",
+                                    variant: "destructive",
+                                });
+                            },
+                        }
+                    );
+                };
 
-                                    </AlertDialogCancel>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                </>
-            )
+                if (user.id === book.user_id) {
+                    return (
+                        <div className="flex items-center gap-2">
+                            <Link href={`${route('book.edit', { 'book': book.id })}`}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                                    <PencilIcon className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                            {isBookMarked(book.id) && (
+                                <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => {
+                                        router.delete(route('api.book.mark.destroy', { 'book': book.id }))
+                                    }}
+                                >
+                                    <XIcon className="h-4 w-4 p-0" />
+                                </Button>
+                            )}
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="icon" className="h-8 w-8 p-0">
+                                        <TrashIcon className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Book</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete this book
+                                            and remove the data from our servers.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete}>
+                                            Delete
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    );
+                }
+
+                return (
+                    <Button
+                        size="icon"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                            router.delete(route('api.book.mark.destroy', { 'book': book.id }), { preserveScroll: true })
+                            toast({
+                                title: "Book Removed!",
+                                description: "Book has been removed from marked books.",
+                            })
+                        }}
+                    >
+                        <XIcon className="h-4 w-4" />
+                    </Button>
+                );
+            }
         }
-    }
-]
+    ];
 
-interface DashboardProps {
-    markedBooks: Book[];
-    userProducts: Book[];
-}
-
-
-
-
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
-}
-
-export function DataTable<TData, TValue>({
-    columns,
-    data,
-}: DataTableProps<TData, TValue>) {
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
-    const [rowSelection, setRowSelection] = React.useState({})
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        onSortingChange: setSorting,
-        getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
-        getFilteredRowModel: getFilteredRowModel(),
-        onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnFilters,
-            rowSelection,
-        },
-    })
-
-    return (
-        <div className="rounded-md border">
-            <div className="flex items-center">
-                <Input
-                    placeholder="Search"
-                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("name")?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
-            </div>
-            <Table>
-                <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </TableHead>
-                                )
-                            })}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow
-                                key={row.id}
-                                data-state={row.getIsSelected() && "selected"}
-                                className=""
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    Next
-                </Button>
-            </div>
-        </div>
-    )
-}
-
-export default function Dashboard({ markedBooks, userProducts }: DashboardProps) {
     return (
         <>
             <Head title="Dashboard" />
             <DashBoard
                 marked={
-                    <>
-                        <DataTable columns={thiscolumns} data={markedBooks} />
-                    </>
+                    <div>
+                        {/* <PriceRangeFilter /> */}
+                        <DataTable columns={columns} data={filteredMarkedBooks} />
+                    </div>
                 }
                 products={
-                    <>
-                        <DataTable columns={thiscolumns} data={userProducts} />
-                    </>
+                    <div>
+                        {/* <PriceRangeFilter /> */}
+                        <DataTable columns={columns} data={filteredUserProducts} />
+                    </div>
                 }
-            >
-
-            </DashBoard>
+            />
         </>
     );
 }
+
+export default Dashboard;

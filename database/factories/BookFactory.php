@@ -20,6 +20,7 @@ class BookFactory extends Factory
             'name' => fake()->sentence(),
             'author' => fake()->name(),
             'price' => fake()->randomFloat(),
+            'description'=>fake()->paragraph(1),
             'user_id' => 1,
         ];
     }

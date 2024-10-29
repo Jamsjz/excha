@@ -10,6 +10,7 @@ export default function Edit(
         mustVerifyEmail: boolean;
         status?: string;
         book: {
+            id: number,
             name: string,
             author: string,
             price: number

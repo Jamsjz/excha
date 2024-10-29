@@ -1,7 +1,6 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Head, Link } from "@inertiajs/react"
-import { PlusIcon, SearchIcon } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Head, Link, router } from "@inertiajs/react"
+import { PlusIcon } from "lucide-react"
 
 import {
     Tooltip,
@@ -11,17 +10,9 @@ import {
 } from "@/components/ui/tooltip"
 
 
-import { MoreHorizontal } from "lucide-react"
 import { ArrowUpDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 
 import {
@@ -46,9 +37,9 @@ import {
 } from "@/components/ui/table"
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { toast } from "@/hooks/use-toast"
 
 
-// const user = usePage().props.auth.user
 
 export const thiscolumns: ColumnDef<Book>[] = [
     {
@@ -115,12 +106,25 @@ export const thiscolumns: ColumnDef<Book>[] = [
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <Button className="h-8 w-8 p-0"
+                                        onClick={() => {
+                                            toast({
+                                                title: "Book Added!",
+                                                description: "Book has been added to Marked Books."
+                                            });
+                                            router.post(
+                                                route('api.book.mark',
+                                                    {
+                                                        'book': row.getValue('id')
+                                                    }
+                                                )
+                                            );
+                                        }}>
                                         <PlusIcon />
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p> Add to Marked Books</p>
+                                    <p> Mark book</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
@@ -168,15 +172,15 @@ export function DataTable<TData, TValue>({
 
     return (
         <>
-            <div className="flex-col justify-center my-5 items-center sm:flex ">
-                <div className="my-5  sm:flex w-full lg:w-[85%] sm:w-[90%] md:w-full">
+            <div className="flex-col justify-center my-5 items-center">
+                <div className="flex flex-col my-5  sm:flex-row w-full items-center justify-between">
                     <Input
                         placeholder="Book Name"
                         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                         onChange={(event) =>
                             table.getColumn("name")?.setFilterValue(event.target.value)
                         }
-                        className="mb-2"
+                        className="mb-2 mr-2"
                     />
                     <Input
                         placeholder="Author"
@@ -185,14 +189,6 @@ export function DataTable<TData, TValue>({
                             table.getColumn("author")?.setFilterValue(event.target.value)
                         }
                         className="mb-2"
-                    />
-                    <Input
-                        placeholder="Price"
-                        value={(table.getColumn("price")?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn("price")?.setFilterValue(event.target.value)
-                        }
-                        className=""
                     />
                 </div>
                 <div className="rounded-md border">

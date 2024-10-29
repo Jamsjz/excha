@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Book;
+use Auth as AuthAuth;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Redirect as RedirectRedirect;
 
 class BookController extends Controller
 {
@@ -18,7 +20,8 @@ class BookController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $books = Book::all();
+        $markedBookIds = $user->marked()->pluck('id')->toArray();
+        $books = Book::whereNotIn('id', $markedBookIds)->get();
 
         return Inertia::render('Profile/Buy', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
@@ -103,6 +106,23 @@ class BookController extends Controller
         $book->update($request->validated());
         $book->save();
     }
+    /**
+     * Add a book to user's marked books
+     */
+    public function mark(Book $book)
+    {
+       $user = Auth::user();
+       $user->marked()->attach($book->id);
+       return redirect(to: route('profile.buy'));
+    }
+
+    public function deleteMark(Book $book)
+    {
+       $user = Auth::user();
+       $user->marked()->detach($book->id);
+       return redirect(to: route('dashboard'));
+    }
+
 
     /**
      * Remove the specified resource from storage.
